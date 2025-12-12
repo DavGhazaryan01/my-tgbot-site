@@ -16,12 +16,12 @@
         body{
             font-family: Arial;
             font-weight: 200;
-            color: var(--tg-theme-text-color)
-            background: var(--tg-theme-bg-color)
+            color: var(--tg-theme-text-color);
+            background: var(--tg-theme-bg-color);
         }
 
         #main{
-            width: 100%
+            width: 100%;
             padding: 20px;
             text-align: center;
         }
@@ -38,7 +38,7 @@
 
         p{
             width: 350px;
-            margin 0 auto
+            margin 0 auto;
         }
 
         button{
@@ -51,7 +51,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 500ms ease;
-            color: var(--tg-theme-text-color);
+            color: white;
             background: var(--tg-theme-bg-color);
 
         }
@@ -89,6 +89,7 @@
     </div>
     <form id = "form">
         <input type="text" placeholder="Name" id="user_name">
+
         <input type="text" placeholder="Email" id="user_email">
         <input type="text" placeholder="Telephone" id="user_phone">
         <button id = "order">Order</button>
@@ -99,15 +100,27 @@
         let buy = document.getElementById("buy");
         let order = document.getElementById("order")
 
-        buy.addEventListener("click", () =>{
-            document.getElementById("main").style.display = "none";
-            document.getElementById("form").style.display = "block";
-            document.getElementById("user_name").value = tg.initDataUnsafe.user.first_name + " " + tg.initDataUnsafe.user.last_name
-        });
+        // Проверка существования данных пользователя
+    buy.addEventListener("click", () =>{
+    document.getElementById("main").style.display = "none";
+    document.getElementById("form").style.display = "block";
 
-        order.addEventListener("click", () => {
-            tg.close();
-        })
+    // Добавьте проверку, чтобы избежать ошибок
+    let userNameField = document.getElementById("user_name");
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        const user = tg.initDataUnsafe.user;
+        const firstName = user.first_name || "";
+        const lastName = user.last_name || "";
+        userNameField.value = `${firstName} ${lastName}`.trim();
+        }
+    });
+
+// Предотвратите отправку формы (чтобы не перезагружалась страница)
+    order.addEventListener("click", (e) => {
+    e.preventDefault(); // Добавьте эту строку
+    tg.close();
+    });
+
 
     </script>
 
