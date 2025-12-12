@@ -77,6 +77,12 @@
         input:focus{
             border-color: #db5d5d;
         }
+        
+        #error {
+            color: red;
+            margin: 10px 0;
+            min-height: 20px;
+        }
     </style>
 </head>
 <body>
@@ -90,7 +96,7 @@
         <input type="text" placeholder="Name" id="user_name">
         <input type="text" placeholder="Email" id="user_email">
         <input type="text" placeholder="Telephone" id="user_phone">
-        <div id = "error"></div>
+        <div id="error"></div>
         <button id="order">Order</button>
     </div>
     <script src="https://telegram.org/js/telegram-web-app.js?59"></script>
@@ -98,7 +104,7 @@
         let tg = window.Telegram.WebApp;
         let buy = document.getElementById("buy");
         let order = document.getElementById("order");
-        tg.expand()
+        tg.expand();
 
         buy.addEventListener("click", () =>{
             document.getElementById("main").style.display = "none";
@@ -109,31 +115,40 @@
         });
 
         order.addEventListener("click", (e) => {
+            e.preventDefault();
+            
             let name = document.getElementById("user_name").value;
-            let email = document.getElementById(user_email).value
-            let phone = document.getElementById(user_phone).value
+            let email = document.getElementById("user_email").value; // Исправлено: кавычки добавлены
+            let phone = document.getElementById("user_phone").value; // Исправлено: кавычки добавлены
+            
+            // Очищаем предыдущие ошибки
+            document.getElementById("error").innerText = "";
+            
             if(name.length < 5){
                 document.getElementById("error").innerText = "Error in name";
                 return;
             }
             if(email.length < 5){
-                document.getElementById("error").innerText = "Error in email"
+                document.getElementById("error").innerText = "Error in email";
                 return;
             }
             if(phone.length < 5){
-                document.getElementById("error").innerText = "Error in phone"
+                document.getElementById("error").innerText = "Error in phone";
                 return;
             }
 
             let data = {
                 name: name,
                 email: email,
-                phone.phone
-            }
+                phone: phone // Исправлено: убрана точка
+            };
+            
             tg.sendData(JSON.stringify(data));
-
-            e.preventDefault();
-            tg.close();
+            
+            // Немного задержки перед закрытием, чтобы данные успели отправиться
+            setTimeout(() => {
+                tg.close();
+            }, 300);
         });
     </script>
 </body>
