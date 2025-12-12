@@ -38,7 +38,7 @@
 
         p{
             width: 350px;
-            margin 0 auto;
+            margin: 0 auto;
         }
 
         button{
@@ -51,9 +51,8 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 500ms ease;
-            color: white;
-            background: var(--tg-theme-bg-color);
-
+            color: var(--tg-theme-text-color);
+            background: var(--tg-theme-button-color);
         }
 
         button:hover{
@@ -66,7 +65,7 @@
         }
 
         input{
-            width: 90px;
+            width: 90%;
             outline: none;
             margin: 10px 5%;
             padding: 15px 10px;
@@ -81,48 +80,36 @@
     </style>
 </head>
 <body>
-    <div id = "main">
+    <div id="main">
         <h1>Online shop</h1>
-        <img src="fish.jpg">
+        <img src="https://img.freepik.com/free-vector/hand-drawn-clown-fish-cartoon-illustration_23-2150683251.jpg">
         <p>Hello</p>
-        <button id = "buy"></button>
+        <button id="buy">Buy</button>
     </div>
-    <form id = "form">
+    <div id="form">
         <input type="text" placeholder="Name" id="user_name">
-
         <input type="text" placeholder="Email" id="user_email">
         <input type="text" placeholder="Telephone" id="user_phone">
-        <button id = "order">Order</button>
-    </form>
+        <button id="order">Order</button>
+    </div>
     <script src="https://telegram.org/js/telegram-web-app.js?59"></script>
     <script>
         let tg = window.Telegram.WebApp;
         let buy = document.getElementById("buy");
-        let order = document.getElementById("order")
+        let order = document.getElementById("order");
 
-        // Проверка существования данных пользователя
-    buy.addEventListener("click", () =>{
-    document.getElementById("main").style.display = "none";
-    document.getElementById("form").style.display = "block";
+        buy.addEventListener("click", () =>{
+            document.getElementById("main").style.display = "none";
+            document.getElementById("form").style.display = "block";
+            if(tg.initDataUnsafe && tg.initDataUnsafe.user){
+                document.getElementById("user_name").value = (tg.initDataUnsafe.user.first_name || "") + " " + (tg.initDataUnsafe.user.last_name || "");
+            }
+        });
 
-    // Добавьте проверку, чтобы избежать ошибок
-    let userNameField = document.getElementById("user_name");
-    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-        const user = tg.initDataUnsafe.user;
-        const firstName = user.first_name || "";
-        const lastName = user.last_name || "";
-        userNameField.value = `${firstName} ${lastName}`.trim();
-        }
-    });
-
-// Предотвратите отправку формы (чтобы не перезагружалась страница)
-    order.addEventListener("click", (e) => {
-    e.preventDefault(); // Добавьте эту строку
-    tg.close();
-    });
-
-
+        order.addEventListener("click", (e) => {
+            e.preventDefault();
+            tg.close();
+        });
     </script>
-
 </body>
 </html>
