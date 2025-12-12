@@ -1,81 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Telegram WebApp</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            color: var(--tg-theme-text-color);
-            background: var(--tg-theme-bg-color);
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Telegram WebApp — Demo</title>
 
-        .card {
-            background: var(--tg-theme-secondary-bg-color);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            margin-bottom: 15px;
-        }
-
-        h1 {
-            margin: 5px 0;
-        }
-
-        p {
-            opacity: 0.8;
-        }
-
-        button {
-            width: 100%;
-            padding: 15px;
-            margin-top: 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            cursor: pointer;
-            background: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
-        }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <img id="avatar" src="" alt="Avatar">
-    <h1 id="name"></h1>
-    <p id="userid"></p>
-
-    <button onclick="sendToBot()">Send message to bot</button>
-</div>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<script>
-    const tg = Telegram.WebApp;
-    tg.expand(); // разворачивает на весь экран
-
-    const user = tg.initDataUnsafe.user;
-
-    // вставляем данные пользователя
-    document.getElementById("name").innerText = user.first_name || "Unknown User";
-    document.getElementById("userid").innerText = "User ID: " + user.id;
-    document.getElementById("avatar").src = user.photo_url || "https://via.placeholder.com/120";
-
-    // кнопка
-    function sendToBot() {
-        tg.sendData("User clicked the button!");
+  <style>
+    :root{
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --btn: #2563eb;
+      --btn-text: #ffffff;
     }
 
-</script>
-    <script src="https://telegram.org/js/telegram-web-app.js?59"></script>
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{width:100%;max-width:420px;background:var(--card);border-radius:14px;padding:22px;box-shadow:0 10px 30px rgba(2,6,23,0.08);text-align:center}
+    .avatar{width:110px;height:110px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block}
+    h1{font-size:20px;margin:6px 0}
+    p{color:var(--muted);margin:4px 0}
+    .btn{display:block;margin-top:18px;padding:12px 16px;border-radius:10px;background:var(--btn);color:var(--btn-text);font-weight:600;border:0;cursor:pointer;font-size:16px}
+    .small{margin-top:12px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <img id="avatar" class="avatar" src="https://via.placeholder.com/110" alt="avatar">
+      <h1 id="name">Guest</h1>
+      <p id="userid">Open from Telegram to see details</p>
+
+      <button class="btn" id="mainBtn">Send to bot</button>
+      <div class="small">This demo uses Telegram Web Apps API</div>
+    </div>
+  </div>
+
+  <!-- версионированный скрипт Telegram Web App (cache-bust) -->
+  <script src="https://telegram.org/js/telegram-web-app.js?59"></script>
+
+  <script>
+    // защита: если не в Telegram, показываем простое поведение
+    if (typeof Telegram === 'undefined' || !Telegram.WebApp) {
+      document.getElementById('name').innerText = 'Not in Telegram';
+      document.getElementById('userid').innerText = 'Open this page from your Telegram bot';
+      document.getElementById('mainBtn').addEventListener('click', () => alert('Open from Telegram to send data to bot.'));
+    } else {
+      const tg = Telegram.WebApp;
+
+      // init
+      try {
+        tg.expand(); // разворачиваем окно
+      } catch(e){ /* ignore if not allowed */ }
+
+      // theme: можно брать параметры темы, если нужны
+      const params = tg.themeParams || {};
+      if (params.bg_color) document.documentElement.style.setProperty('--bg', params.bg_color);
+      if (params.button_color) document.documentElement.style.setProperty('--btn', params.button_color);
+      if (params.button_text_color) document.documentElement.style.setProperty('--btn-text', params.button_text_color);
+
+      // данные пользователя (безопасный начальный объект)
+      const user = (tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : null;
+
+      if (user) {
+        document.getElementById('name').innerText = (user.first_name || '') + (user.last_name ? ' ' + user.last_name : '');
+        document.getElementById('userid').innerText = 'User id: ' + user.id;
+        if (user.photo_url) document.getElementById('avatar').src = user.photo_url;
+      } else {
+        document.getElementById('name').innerText = 'Telegram user';
+        document.getElementById('userid').innerText = 'No user data available';
+      }
+
+      // main button action: отправляем данные боту
+      document.getElementById('mainBtn').addEventListener('click', () => {
+        // можно передать JSON-строку
+        const payload = {
+          action: 'clicked_demo_button',
+          ts: Date.now(),
+          user: user ? { id: user.id, name: user.first_name } : null
+        };
+        tg.sendData(JSON.stringify(payload));
+        // дать обратную связь в WebApp
+        tg.MainButton.setText('Sent ✓');
+        tg.MainButton.show();
+        setTimeout(()=>tg.MainButton.hide(), 1200);
+      });
+    }
+  </script>
 </body>
 </html>
